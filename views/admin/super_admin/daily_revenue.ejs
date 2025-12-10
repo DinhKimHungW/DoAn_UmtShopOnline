@@ -1,0 +1,81 @@
+<%- include('../partials/header') %>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">Daily Revenue Report</h2>
+        <h4 class="text-muted"><%= date %></h4>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Total Revenue Today</h6>
+                    <h3 class="card-text"><%= totalRevenue.toLocaleString() %> VND</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Total Orders Today</h6>
+                    <h3 class="card-text"><%= orders.length %></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Orders List</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Email</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (orders && orders.length > 0) { %>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td>#<%= order.id %></td>
+                                    <td><%= order.users ? order.users.name : 'Unknown' %></td>
+                                    <td><%= order.users ? order.users.email : 'N/A' %></td>
+                                    <td class="fw-bold"><%= order.total_amount.toLocaleString() %> VND</td>
+                                    <td>
+                                        <span class="badge bg-<%= order.status === 'completed' ? 'success' : (order.status === 'pending' ? 'warning' : 'secondary') %>">
+                                            <%= order.status.toUpperCase() %>
+                                        </span>
+                                    </td>
+                                    <td><%= new Date(order.created_at).toLocaleTimeString() %></td>
+                                    <td>
+                                        <a href="/orders/<%= order.id %>" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7" class="text-center py-4">No orders found for today.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="/admin" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

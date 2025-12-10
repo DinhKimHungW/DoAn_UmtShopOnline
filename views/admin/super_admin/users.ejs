@@ -1,0 +1,112 @@
+<%- include('../partials/header') %>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-primary">Manage Users</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="/admin" class="text-decoration-none">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Users</li>
+                </ol>
+            </nav>
+        </div>
+        <span class="badge bg-danger rounded-pill px-3 py-2">Super Admin Area</span>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">User</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Current Role</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (users && users.length > 0) { %>
+                            <% users.forEach(u => { %>
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user text-muted"></i>
+                                            </div>
+                                            <div class="fw-bold"><%= u.name %></div>
+                                        </div>
+                                    </td>
+                                    <td><%= u.email %></td>
+                                    <td><%= u.phone || 'N/A' %></td>
+                                    <td>
+                                        <% 
+                                            let roleClass = 'bg-secondary';
+                                            if (u.roles.name === 'super_admin') roleClass = 'bg-danger';
+                                            if (u.roles.name === 'admin_canteen') roleClass = 'bg-primary';
+                                            if (u.roles.name === 'user') roleClass = 'bg-info text-dark';
+                                        %>
+                                        <span class="badge <%= roleClass %> rounded-pill"><%= u.roles.name.replace('_', ' ').toUpperCase() %></span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <% if (u.email !== user.email) { %>
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <form action="/admin/users/role/<%= u.id %>" method="POST" class="d-inline">
+                                                    <select name="role_id" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+                                                        <% roles.forEach(role => { %>
+                                                            <option value="<%= role.id %>" <%= u.role_id === role.id ? 'selected' : '' %>>
+                                                                <%= role.name.replace('_', ' ').toUpperCase() %>
+                                                            </option>
+                                                        <% }) %>
+                                                    </select>
+                                                </form>
+                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(<%= u.id %>, '<%= u.name %>')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        <% } else { %>
+                                            <span class="text-muted small">Current User</span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">No users found.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function deleteUser(userId, userName) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Do you want to delete user "${userName}"? This action cannot be undone.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Call API to delete user
+                fetch(`/admin/users/${userId}`, {
+                    method: 'DELETE'
+                }).then(() => {
+                    location.reload();
+                });
+            }
+        });
+    }
+</script>
+
+<%- include('../partials/footer') %>
