@@ -1,0 +1,121 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="glass-card p-5 animate__animated animate__fadeInUp">
+                <h2 class="text-center mb-4" style="color: var(--text-primary); font-weight: 700;">My Profile</h2>
+                
+                <form id="profileForm">
+                    <div class="mb-3">
+                        <label for="name" class="form-label" style="color: var(--text-secondary);">Full Name</label>
+                        <input type="text" class="form-control glass-input" id="name" name="name" value="<%= user.name || '' %>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label" style="color: var(--text-secondary);">Email</label>
+                        <input type="email" class="form-control glass-input" id="email" value="<%= user.email %>" disabled>
+                        <div class="form-text" style="color: var(--text-muted);">Email cannot be changed.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label" style="color: var(--text-secondary);">Phone</label>
+                        <input type="text" class="form-control glass-input" id="phone" name="phone" value="<%= user.phone || '' %>">
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label" style="color: var(--text-secondary);">Address</label>
+                        <textarea class="form-control glass-input" id="address" name="address" rows="3"><%= user.address || '' %></textarea>
+                    </div>
+                    
+                    <hr style="border-color: rgba(255,255,255,0.1);">
+                    
+                    <h4 class="mb-3" style="color: var(--text-primary);">Change Password</h4>
+                    <div class="mb-3">
+                        <label for="password" class="form-label" style="color: var(--text-secondary);">New Password (leave blank to keep current)</label>
+                        <input type="password" class="form-control glass-input" id="password" name="password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label" style="color: var(--text-secondary);">Confirm New Password</label>
+                        <input type="password" class="form-control glass-input" id="confirm_password" name="confirm_password">
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary glass-btn">Update Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('profileForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    
+    if (password && password !== confirmPassword) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Passwords do not match!',
+            background: 'rgba(255, 255, 255, 0.1)',
+            color: '#fff',
+            backdrop: `rgba(0,0,0,0.4)`
+        });
+        return;
+    }
+
+    const formData = {
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value,
+        new_password: password
+    };
+
+    try {
+        const response = await fetch('/profile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Profile updated successfully.',
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                backdrop: `rgba(0,0,0,0.4)`
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: result.error || 'Failed to update profile',
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                backdrop: `rgba(0,0,0,0.4)`
+            });
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An unexpected error occurred',
+            background: 'rgba(255, 255, 255, 0.1)',
+            color: '#fff',
+            backdrop: `rgba(0,0,0,0.4)`
+        });
+    }
+});
+</script>
+
+<%- include('partials/footer') %>
