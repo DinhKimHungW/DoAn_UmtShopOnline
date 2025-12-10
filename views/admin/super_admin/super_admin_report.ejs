@@ -1,0 +1,100 @@
+<%- include('../partials/header') %>
+
+<div class="container py-5">
+    <h2 class="text-primary mb-4">Super Admin Detailed Report</h2>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Total Revenue (All Time)</h6>
+                    <h3 class="card-text"><%= stats.totalRevenue.toLocaleString() %> VND</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Total Orders</h6>
+                    <h3 class="card-text"><%= stats.totalOrders %></h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Cancelled Orders</h6>
+                    <h3 class="card-text"><%= stats.cancelledOrdersCount %></h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">New Users (Last 30 Days)</h6>
+                    <h3 class="card-text"><%= stats.newUsersCount %></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">Filter by Date Range</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="/admin/reports/super-admin" class="row g-3">
+                <div class="col-md-5">
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" id="startDate" name="startDate" value="<%= startDate %>">
+                </div>
+                <div class="col-md-5">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="date" class="form-control" id="endDate" name="endDate" value="<%= endDate %>">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">Orders in Selected Period</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Order ID</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (orders && orders.length > 0) { %>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td class="ps-4 fw-bold">#<%= order.id %></td>
+                                    <td>
+                                        <div class="fw-bold"><%= order.users ? order.users.name : 'Unknown' %></div>
+                                        <small class="text-muted"><%= order.users ? order.users.email : '' %></small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            <%= order.order_items.length %> item(s)
+                                        </small>
+                                    </td>
+                                    <td class="fw-bold"><%= order.total_amount.toLocaleString() %> VND</td>
+                                    <td>
+                                        <% 
