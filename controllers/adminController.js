@@ -127,8 +127,47 @@ exports.postEditProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
     const { id } = req.params;
-    await supabase.from('products').delete().eq('id', id);
-    res.redirect('/admin/products');
+    try {
+
+        // Xóa order_items liên quan
+        const { error: orderItemError } = await supabase.from('order_items').delete().eq('product_id', id);
+        if (orderItemError) {
+            console.error('Delete product order_items error:', orderItemError.message);
+            return res.status(500).send('Không thể xóa sản phẩm khỏi đơn hàng.');
+        }
+
+        // Xóa review liên quan
+        const { error: reviewError } = await supabase.from('reviews').delete().eq('product_id', id);
+        if (reviewError) {
+            console.error('Delete product reviews error:', reviewError.message);
+            return res.status(500).send('Không thể xóa đánh giá sản phẩm.');
+        }
+
+        // Xóa cart_items liên quan
+        const { error: cartItemError } = await supabase.from('cart_items').delete().eq('product_id', id);
+        if (cartItemError) {
+            console.error('Delete product cart_items error:', cartItemError.message);
+            return res.status(500).send('Không thể xóa sản phẩm khỏi giỏ hàng.');
+        }
+
+        // Xóa product_images liên quan
+        const { error: imageError } = await supabase.from('product_images').delete().eq('product_id', id);
+        if (imageError) {
+            console.error('Delete product images error:', imageError.message);
+            return res.status(500).send('Không thể xóa ảnh sản phẩm.');
+        }
+
+        // Xóa sản phẩm
+        const { error } = await supabase.from('products').delete().eq('id', id);
+        if (error) {
+            console.error('Delete product error:', error.message);
+            return res.status(500).send('Không thể xóa sản phẩm. Vui lòng thử lại hoặc kiểm tra ràng buộc dữ liệu!');
+        }
+        res.redirect('/admin/products');
+    } catch (err) {
+        console.error('Delete product exception:', err.message);
+        res.status(500).send('Có lỗi xảy ra khi xóa sản phẩm.');
+    }
 };
 
 exports.getOrders = async (req, res) => {
